@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>This vs That 밸런스 게임</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #game-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    #question-text {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .choice-btn {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .choice-a { background-color: #4CAF50; color: white; }
+    .choice-b { background-color: #FF5722; color: white; }
+    #mbti-result {
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #restart {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #2196F3;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-box">
+    <div id="question-text">질문 불러오는 중...</div>
+    <button class="choice-btn choice-a" onclick="choose('A')"></button>
+    <button class="choice-btn choice-b" onclick="choose('B')"></button>
+    <div id="mbti-result"></div>
+    <button id="restart" onclick="location.reload()" style="display:none;">다시 하기</button>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "파티에 가기 vs 집에서 혼자 시간 보내기", a: "파티에 가기", b: "혼자 있기", dim: "E" },
+      { q: "사실에 집중 vs 가능성 상상", a: "사실에 집중", b: "가능성 상상", dim: "S" },
+      { q: "논리적으로 결정 vs 감정적으로 공감", a: "논리적으로 결정", b: "감정적으로 공감", dim: "T" },
+      { q: "계획 세우기 vs 즉흥적으로 하기", a: "계획 세우기", b: "즉흥적으로 하기", dim: "J" },
+      { q: "사람들과 어울리기 vs 조용한 시간 즐기기", a: "어울리기", b: "조용히 있기", dim: "E" },
+      { q: "현재에 집중 vs 미래 상상", a: "현재", b: "미래", dim: "N" },
+      { q: "정의에 따라 판단 vs 상황을 고려해 판단", a: "정의", b: "상황", dim: "T" },
+      { q: "정리된 일정 vs 유동적인 시간", a: "정리된 일정", b: "유동적인 시간", dim: "P" },
+      { q: "여럿과 활동하기 vs 혼자만의 여행", a: "여럿과", b: "혼자", dim: "I" },
+      { q: "세부사항 중시 vs 직관과 느낌", a: "세부사항", b: "직관", dim: "S" },
+      { q: "사실 중심적 사고 vs 감정 중심적 사고", a: "사실", b: "감정", dim: "F" },
+      { q: "계획적 준비 vs 즉석 반응", a: "계획적", b: "즉석", dim: "J" }
+    ];
+
+    let index = 0;
+    let traits = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+    function loadQuestion() {
+      const q = questions[index];
+      document.getElementById("question-text").innerText = q.q;
+      document.querySelector(".choice-a").innerText = q.a;
+      document.querySelector(".choice-b").innerText = q.b;
+    }
+
+    function choose(choice) {
+      const q = questions[index];
+      const trait = q.dim;
+      if (choice === 'A') {
+        traits[trait]++;
+      } else {
+        traits[getOpposite(trait)]++;
+      }
+      index++;
+      if(index < questions.length){
+        loadQuestion();
+      } else {
+        showMBTI();
+      }
+    }
+
+    function getOpposite(trait) {
+      const opposites = { E: "I", I: "E", S: "N", N: "S", T: "F", F: "T", J: "P", P: "J" };
+      return opposites[trait];
+    }
+
+    function showMBTI(){
+      document.getElementById("question-text").innerText = "🎉 당신의 성향 분석 결과!";
+      document.querySelector(".choice-a").style.display = "none";
+      document.querySelector(".choice-b").style.display = "none";
+
+      const mbti = [traits["E"] >= traits["I"] ? "E" : "I",
+                    traits["S"] >= traits["N"] ? "S" : "N",
+                    traits["T"] >= traits["F"] ? "T" : "F",
+                    traits["J"] >= traits["P"] ? "J" : "P"].join("");
+
+      const descriptions = {
+        ENFP: "🌈 창의적이고 에너지 넘치는 사람! 새로운 아이디어에 열정적이에요.",
+        ISTJ: "📘 신중하고 성실한 타입! 계획적으로 움직이는 걸 좋아해요.",
+        INFP: "💫 감성 풍부한 이상주의자! 조용하지만 깊은 내면을 지녔어요.",
+        ESTP: "🔥 액션과 도전을 즐기는 타입! 즉흥적이고 활동적이에요.",
+        default: "🧠 균형 잡힌 성향의 사람! 다양한 상황에서 유연하게 대처할 수 있어요."
+      };
+
+      const description = descriptions[mbti] || descriptions.default;
+      document.getElementById("mbti-result").innerHTML =
+        `당신은 ${mbti} 유형이에요!<br>${description}`;
+
+      document.getElementById("restart").style.display = "inline-block";
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
